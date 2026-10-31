@@ -10,10 +10,10 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+            Text("Barcode Test Generation")
+            if let img = BarcodeGenerator.image(for: "123456789", type: .barcode128) {
+                Image(uiImage: img).interpolation(.none).resizable().frame(height: 100)
+            }
         }
         .padding()
     }
