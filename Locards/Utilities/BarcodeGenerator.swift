@@ -17,12 +17,14 @@ enum BarcodeGenerator {
             }
             let code128 = CIFilter.code128BarcodeGenerator()
             code128.message = data
+            // determines the space around and how tall the barcode generated should be
             code128.quietSpace = 5
             code128.barcodeHeight = 20
             filter = code128
         case .qr:
             let qr = CIFilter.qrCodeGenerator()
             qr.message = Data(value.utf8)
+            // recovers up to 15% data damage
             qr.correctionLevel = "M"
             filter = qr
         case .pdf417:
