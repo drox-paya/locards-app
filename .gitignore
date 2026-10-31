@@ -1,0 +1,4 @@
+build/
+buildServer.json
+.nvim/
+Locards.xcodeproj/xcuserdata/
