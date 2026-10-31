@@ -25,6 +25,10 @@ enum BarcodeGenerator {
             qr.message = Data(value.utf8)
             qr.correctionLevel = "M"
             filter = qr
+        case .pdf417:
+            let pdf417 = CIFilter.pdf417BarcodeGenerator()
+            pdf417.message = Data(value.utf8)
+            filter = pdf417
         }
 
         guard let output = filter.outputImage else {

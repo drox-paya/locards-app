@@ -4,7 +4,7 @@ import SwiftData
 enum CardType: String, Codable, CaseIterable {
     case barcode128 = "code128"
     case qr = "qr"
-
+    case pdf417 = "pdf417"
 }
 
 @Model
