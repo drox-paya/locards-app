@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-enum CardType: String, CaseIterable {
+enum CardType: String, Codable, CaseIterable {
     case barcode128 = "code128"
     case qr = "qr"
 
