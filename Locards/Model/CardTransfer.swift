@@ -17,11 +17,16 @@ struct CardRecord: Codable {
         lastOpened = card.lastOpened
     }
 
+    var isValid: Bool {
+        let number = barcodeString.trimmed
+        return !name.trimmed.isEmpty && !number.isEmpty && barcodeType.accepts(number)
+    }
+
     func makeCard() -> LoyaltyCard {
         let card = LoyaltyCard(
-            name: name,
+            name: name.trimmed,
             dateAdded: dateAdded,
-            barcodeString: barcodeString,
+            barcodeString: barcodeString.trimmed,
             barcodeType: barcodeType
         )
         card.lastOpened = lastOpened

@@ -29,7 +29,7 @@ final class HomeViewModel {
         case .recentlyAdded:
             savedCards = cards.sorted { $0.dateAdded > $1.dateAdded }
         case .alphabetical:
-            savedCards = cards.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+            savedCards = cards.sorted { $0.name < $1.name }
         }
     }
     func addCard(card: LoyaltyCard) {
@@ -38,24 +38,21 @@ final class HomeViewModel {
         // do we need to load here?
         load()
     }
-    func deleteCards(at offsets: IndexSet) {
-        for index in offsets {
-            context.delete(savedCards[index])
-        }
-        save()
-        load()
-    }
     func delete(card: LoyaltyCard) {
         context.delete(card)
         save()
         load()
     }
-    @discardableResult
-    func importCards(_ records: [CardRecord]) -> Int {
+    func importCards(_ records: [CardRecord]) -> (added: Int, skipped: Int) {
         var known = Set(savedCards.map { "\($0.name)|\($0.barcodeString)" })
         var added = 0
+        var skipped = 0
         for record in records {
-            let key = "\(record.name)|\(record.barcodeString)"
+            guard record.isValid else {
+                skipped += 1
+                continue
+            }
+            let key = "\(record.name.trimmed)|\(record.barcodeString.trimmed)"
             guard !known.contains(key) else { continue }
             known.insert(key)
             context.insert(record.makeCard())
@@ -63,7 +60,7 @@ final class HomeViewModel {
         }
         save()
         load()
-        return added
+        return (added, skipped)
     }
     var pinnedCard: LoyaltyCard? {
         savedCards.first { $0.isPinned }

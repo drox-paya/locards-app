@@ -22,15 +22,18 @@ struct CardAddView: View {
                     LabeledContent("Retailer", value: retailerName.isEmpty ? "Other" : retailerName)
                 }
                 .onChange(of: retailerName) { _, newValue in
-                    if !newValue.isEmpty {
-                        cardName = newValue
-                    }
+                    cardName = newValue
                 }
             }
 
             Section("Card Details") {
                 TextField("Card Name", text: $cardName)
                 TextField("Card Number", text: $cardNumber)
+                if !cardNumber.trimmed.isEmpty && !cardType.accepts(cardNumber.trimmed) {
+                    Text("Code 128 only supports standard ASCII characters.")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
                 Picker("Barcode Type", selection: $cardType) {
                     ForEach(CardType.allCases, id: \.self) { type in
                         Text(type.displayName).tag(type)
@@ -45,21 +48,26 @@ struct CardAddView: View {
                 Button("Save") {
                     save()
                 }
-                .disabled(cardName.isEmpty || cardNumber.isEmpty)
+                .disabled(!isValid)
             }
         }
         .navigationTitle("New Card")
     }
 
+    private var isValid: Bool {
+        !cardName.trimmed.isEmpty && !cardNumber.trimmed.isEmpty && cardType.accepts(cardNumber.trimmed)
+    }
+
     private func save() {
+        let name = cardName.trimmed
         if retailerName.isEmpty && saveRetailer
-            && !Retailer.allCases.contains(where: { $0.rawValue == cardName })
-            && !customRetailers.contains(where: { $0.name == cardName }) {
-            modelContext.insert(CustomRetailer(name: cardName))
+            && !Retailer.allCases.contains(where: { $0.rawValue == name })
+            && !customRetailers.contains(where: { $0.name == name }) {
+            modelContext.insert(CustomRetailer(name: name))
         }
         let card = LoyaltyCard(
-            name: cardName,
-            barcodeString: cardNumber,
+            name: name,
+            barcodeString: cardNumber.trimmed,
             barcodeType: cardType
         )
         viewmodel.addCard(card: card)

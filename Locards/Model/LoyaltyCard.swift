@@ -13,6 +13,17 @@ enum CardType: String, Codable, CaseIterable {
         case .pdf417: return "PDF417"
         }
     }
+
+    func accepts(_ value: String) -> Bool {
+        switch self {
+        case .barcode128: return value.allSatisfy { $0.isASCII }
+        case .qr, .pdf417: return true
+        }
+    }
+}
+
+extension String {
+    var trimmed: String { trimmingCharacters(in: .whitespacesAndNewlines) }
 }
 
 @Model

@@ -37,7 +37,7 @@ struct SettingsView: View {
                 contentType: .json,
                 defaultFilename: "Locards Cards"
             ) { result in
-                if case .failure(let error) = result {
+                if case .failure(let error) = result, (error as? CocoaError)?.code != .userCancelled {
                     message = "Export failed: \(error.localizedDescription)"
                 }
             }
@@ -76,8 +76,12 @@ struct SettingsView: View {
             }
             do {
                 let records = try CardRecord.decode(Data(contentsOf: url))
-                let added = homeVM.importCards(records)
-                message = "Imported \(added) new card(s)."
+                let result = homeVM.importCards(records)
+                var text = "Imported \(result.added) new card(s)."
+                if result.skipped > 0 {
+                    text += " Skipped \(result.skipped) invalid card(s)."
+                }
+                message = text
             } catch {
                 message = "Import failed: \(error.localizedDescription)"
             }

@@ -2,3 +2,5 @@ build/
 buildServer.json
 .nvim/
 Locards.xcodeproj/xcuserdata/
+AGENTS.md
+/AGENTS.md
