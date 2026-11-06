@@ -73,6 +73,13 @@ struct HomeView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(height: 100)
+                        .padding(8)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 8))
+                        .accessibilityLabel("Barcode for \(card.name)")
+                }
+                if card.barcodeType.showsNumber {
+                    Text(card.barcodeString)
+                        .font(.system(.body, design: .monospaced))
                 }
             }
             .frame(maxWidth: .infinity)
@@ -97,36 +104,8 @@ struct HomeView: View {
     }
 
     private func cardTile(for card: LoyaltyCard) -> some View {
-        VStack(spacing: 0) {
-            logo(for: card)
-                .padding(16)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            Text(card.name)
-                .font(.headline)
-                .multilineTextAlignment(.center)
-                .padding(8)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .frame(height: 200)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemBackground))
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-
-    @ViewBuilder
-    private func logo(for card: LoyaltyCard) -> some View {
-        if let retailer = Retailer(rawValue: card.name) {
-            Image(retailer.logoName)
-                .resizable()
-                .scaledToFit()
-        } else {
-            Image(systemName: "storefront")
-                .resizable()
-                .scaledToFit()
-                .foregroundStyle(.secondary)
-        }
+        RetailerTile(name: card.name, retailer: Retailer(rawValue: card.name))
+            .frame(height: 200)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }

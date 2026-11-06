@@ -1,7 +1,14 @@
 import SwiftUI
+import UIKit
 
 struct CardDetailView: View {
     let card: LoyaltyCard
+    @State private var originalBrightness: CGFloat?
+
+    private var screen: UIScreen? {
+        UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first?.screen
+    }
+
     var body: some View {
         VStack {
             Text(card.name)
@@ -12,11 +19,25 @@ struct CardDetailView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(height: 100)
+                    .padding()
+                    .background(.white, in: RoundedRectangle(cornerRadius: 8))
+                    .accessibilityLabel("Barcode for \(card.name)")
+                if card.barcodeType.showsNumber {
+                    Text(card.barcodeString)
+                        .font(.system(.body, design: .monospaced))
+                }
             }
         }
         .padding()
         .onAppear {
             card.lastOpened = .now
+            originalBrightness = screen?.brightness
+            screen?.brightness = 1
+        }
+        .onDisappear {
+            if let originalBrightness {
+                screen?.brightness = originalBrightness
+            }
         }
     }
 }

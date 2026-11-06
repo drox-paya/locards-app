@@ -14,6 +14,10 @@ enum CardType: String, Codable, CaseIterable {
         }
     }
 
+    var showsNumber: Bool {
+        self != .qr
+    }
+
     func accepts(_ value: String) -> Bool {
         switch self {
         case .barcode128: return value.allSatisfy { $0.isASCII }
