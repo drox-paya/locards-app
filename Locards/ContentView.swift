@@ -8,17 +8,18 @@
 import SwiftUI
 
 struct ContentView: View {
+    var viewmodel: HomeViewModel
+    @AppStorage("appearance") private var appearance: AppearanceMode = .system
+
     var body: some View {
-        VStack {
-            Text("Barcode Test Generation")
-            if let img = BarcodeGenerator.image(for: "123456789", type: .barcode128) {
-                Image(uiImage: img).interpolation(.none).resizable().frame(height: 100)
+        TabView {
+            HomeView(homeVM: viewmodel).tabItem {
+                Label("Home", systemImage: "house.fill")
+            }
+            SettingsView(homeVM: viewmodel).tabItem {
+                Label("Settings", systemImage: "gearshape.fill")
             }
         }
-        .padding()
+        .preferredColorScheme(appearance.colorScheme)
     }
-}
-
-#Preview {
-    ContentView()
 }

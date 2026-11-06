@@ -5,12 +5,23 @@ enum CardType: String, Codable, CaseIterable {
     case barcode128 = "code128"
     case qr = "qr"
     case pdf417 = "pdf417"
+
+    var displayName: String {
+        switch self {
+        case .barcode128: return "Code 128"
+        case .qr: return "QR Code"
+        case .pdf417: return "PDF417"
+        }
+    }
 }
 
 @Model
 class LoyaltyCard {
     var name: String
+
     var dateAdded: Date
+    var lastOpened: Date?
+    var isPinned: Bool = false
     var barcodeString: String
     var barcodeType: CardType
 
@@ -20,6 +31,8 @@ class LoyaltyCard {
     ) {
         self.name = name
         self.dateAdded = dateAdded
+        self.lastOpened = nil
+        self.isPinned = false
         self.barcodeString = barcodeString
         self.barcodeType = barcodeType
     }
