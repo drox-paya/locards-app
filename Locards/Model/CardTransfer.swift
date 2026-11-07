@@ -8,6 +8,7 @@ struct CardRecord: Codable {
     let barcodeType: CardType
     let dateAdded: Date
     let lastOpened: Date?
+    let isPinned: Bool
 
     init(card: LoyaltyCard) {
         name = card.name
@@ -15,6 +16,7 @@ struct CardRecord: Codable {
         barcodeType = card.barcodeType
         dateAdded = card.dateAdded
         lastOpened = card.lastOpened
+        isPinned = card.isPinned
     }
 
     var isValid: Bool {
@@ -30,21 +32,31 @@ struct CardRecord: Codable {
             barcodeType: barcodeType
         )
         card.lastOpened = lastOpened
+        card.isPinned = isPinned
         return card
     }
 
-    static func encode(_ cards: [LoyaltyCard]) throws -> Data {
+    static func encode(_ cards: [LoyaltyCard], customRetailers: [String] = []) throws -> Data {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try encoder.encode(cards.map(CardRecord.init(card:)))
+        let envelope = CardsExport(
+            cards: cards.map(CardRecord.init(card:)),
+            customRetailers: customRetailers
+        )
+        return try encoder.encode(envelope)
     }
 
-    static func decode(_ data: Data) throws -> [CardRecord] {
+    static func decode(_ data: Data) throws -> CardsExport {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode([CardRecord].self, from: data)
+        return try decoder.decode(CardsExport.self, from: data)
     }
+}
+
+struct CardsExport: Codable {
+    let cards: [CardRecord]
+    let customRetailers: [String]
 }
 
 struct CardsDocument: FileDocument {

@@ -12,20 +12,18 @@ import SwiftUI
 struct LocardsApp: App {
     let container: ModelContainer
     let homeVM: HomeViewModel
+    let recovered: Bool
 
     init() {
-        let container: ModelContainer
-        do {
-            container = try ModelContainer(for: LoyaltyCard.self, CustomRetailer.self)
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-        self.container = container
-        self.homeVM = HomeViewModel(context: container.mainContext)
+        let result = StoreRecovery.makeContainer()
+        container = result.container
+        recovered = result.recovered
+        homeVM = HomeViewModel(context: container.mainContext)
     }
+
     var body: some Scene {
         WindowGroup {
-            ContentView(viewmodel: homeVM)
+            ContentView(viewmodel: homeVM, recovered: recovered)
         }.modelContainer(container)
     }
 }

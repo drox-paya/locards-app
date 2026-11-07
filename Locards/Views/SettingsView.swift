@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var isExporting = false
     @State private var isImporting = false
     @State private var message: String?
+    @State private var recoveredFiles = StoreRecovery.recoveredFiles()
 
     var body: some View {
         NavigationStack {
@@ -27,6 +28,16 @@ struct SettingsView: View {
                     }
                     Button("Import Cards") {
                         isImporting = true
+                    }
+                }
+
+                if !recoveredFiles.isEmpty {
+                    Section {
+                        ShareLink("Export recovered data", items: recoveredFiles)
+                    } header: {
+                        Text("Recovery")
+                    } footer: {
+                        Text("Locards couldn't open its data and kept a copy of it. Save these files somewhere safe.")
                     }
                 }
             }
@@ -60,7 +71,7 @@ struct SettingsView: View {
 
     private func exportCards() {
         do {
-            exportDocument = CardsDocument(data: try CardRecord.encode(homeVM.savedCards))
+            exportDocument = CardsDocument(data: try CardRecord.encode(homeVM.savedCards, customRetailers: homeVM.customRetailerNames))
             isExporting = true
         } catch {
             message = "Export failed: \(error.localizedDescription)"
@@ -75,8 +86,8 @@ struct SettingsView: View {
                 if accessed { url.stopAccessingSecurityScopedResource() }
             }
             do {
-                let records = try CardRecord.decode(Data(contentsOf: url))
-                let result = homeVM.importCards(records)
+                let export = try CardRecord.decode(Data(contentsOf: url))
+                let result = homeVM.importCards(export)
                 var text = "Imported \(result.added) new card(s)."
                 if result.skipped > 0 {
                     text += " Skipped \(result.skipped) invalid card(s)."

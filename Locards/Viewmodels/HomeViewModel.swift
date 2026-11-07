@@ -43,11 +43,23 @@ final class HomeViewModel {
         save()
         load()
     }
-    func importCards(_ records: [CardRecord]) -> (added: Int, skipped: Int) {
+    func update(card: LoyaltyCard, name: String, number: String, type: CardType) {
+        card.name = name.trimmed
+        card.barcodeString = number.trimmed
+        card.barcodeType = type
+        save()
+        load()
+    }
+    var customRetailerNames: [String] {
+        let all = (try? context.fetch(FetchDescriptor<CustomRetailer>())) ?? []
+        return all.map(\.name).sorted()
+    }
+    func importCards(_ export: CardsExport) -> (added: Int, skipped: Int) {
         var known = Set(savedCards.map { "\($0.name)|\($0.barcodeString)" })
+        var hasPinned = pinnedCard != nil
         var added = 0
         var skipped = 0
-        for record in records {
+        for record in export.cards {
             guard record.isValid else {
                 skipped += 1
                 continue
@@ -55,8 +67,18 @@ final class HomeViewModel {
             let key = "\(record.name.trimmed)|\(record.barcodeString.trimmed)"
             guard !known.contains(key) else { continue }
             known.insert(key)
-            context.insert(record.makeCard())
+            let card = record.makeCard()
+            if card.isPinned && hasPinned { card.isPinned = false }
+            hasPinned = hasPinned || card.isPinned
+            context.insert(card)
             added += 1
+        }
+        var knownRetailers = Set(customRetailerNames)
+        for name in export.customRetailers.map(\.trimmed) where !name.isEmpty {
+            guard !Retailer.allCases.contains(where: { $0.rawValue == name }),
+                knownRetailers.insert(name).inserted
+            else { continue }
+            context.insert(CustomRetailer(name: name))
         }
         save()
         load()

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var homeVM: HomeViewModel
+    @State private var editingCard: LoyaltyCard?
     init(homeVM: HomeViewModel) {
         _homeVM = State(initialValue: homeVM)
     }
@@ -20,11 +21,12 @@ struct HomeView: View {
                     }
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(homeVM.savedCards.filter { !$0.isPinned }) { card in
-                            NavigationLink(destination: CardDetailView(card: card)) {
+                            NavigationLink(destination: CardDetailView(viewmodel: homeVM, card: card)) {
                                 cardTile(for: card)
                             }
                             .buttonStyle(.plain)
                             .contextMenu {
+                                editButton(for: card)
                                 pinButton(for: card)
                                 Button(role: .destructive) {
                                     homeVM.delete(card: card)
@@ -50,12 +52,17 @@ struct HomeView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink(destination: CardAddView(viewmodel: homeVM)) {
+                    NavigationLink(destination: CardEditorView(viewmodel: homeVM)) {
                         Image(systemName: "plus")
                     }
                 }
             }
             .navigationTitle("Locards")
+            .sheet(item: $editingCard) { card in
+                NavigationStack {
+                    CardEditorView(viewmodel: homeVM, mode: .edit(card))
+                }
+            }
             .onAppear {
                 homeVM.load()
             }
@@ -63,7 +70,7 @@ struct HomeView: View {
     }
 
     private func pinnedSection(for card: LoyaltyCard) -> some View {
-        NavigationLink(destination: CardDetailView(card: card)) {
+        NavigationLink(destination: CardDetailView(viewmodel: homeVM, card: card)) {
             VStack(spacing: 8) {
                 Text(card.name)
                     .font(.headline)
@@ -91,7 +98,16 @@ struct HomeView: View {
         }
         .buttonStyle(.plain)
         .contextMenu {
+            editButton(for: card)
             pinButton(for: card)
+        }
+    }
+
+    private func editButton(for card: LoyaltyCard) -> some View {
+        Button {
+            editingCard = card
+        } label: {
+            Label("Edit", systemImage: "pencil")
         }
     }
 

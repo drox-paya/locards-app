@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     var viewmodel: HomeViewModel
+    var recovered = false
+    @State private var showRecoveryAlert = false
     @AppStorage("appearance") private var appearance: AppearanceMode = .system
 
     var body: some View {
@@ -21,5 +23,11 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(appearance.colorScheme)
+        .onAppear { showRecoveryAlert = recovered }
+        .alert("Your cards couldn't be opened", isPresented: $showRecoveryAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("A copy was saved. Export it from Settings → Recovery.")
+        }
     }
 }
