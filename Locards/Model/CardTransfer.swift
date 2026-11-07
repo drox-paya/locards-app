@@ -8,7 +8,7 @@ struct CardRecord: Codable {
     let barcodeType: CardType
     let dateAdded: Date
     let lastOpened: Date?
-    let isPinned: Bool?
+    let isPinned: Bool
 
     init(card: LoyaltyCard) {
         name = card.name
@@ -32,7 +32,7 @@ struct CardRecord: Codable {
             barcodeType: barcodeType
         )
         card.lastOpened = lastOpened
-        card.isPinned = isPinned ?? false
+        card.isPinned = isPinned
         return card
     }
 
@@ -48,16 +48,10 @@ struct CardRecord: Codable {
         return try encoder.encode(envelope)
     }
 
-    /// Accepts the v2 envelope, or the legacy v1 bare array of cards.
     static func decode(_ data: Data) throws -> CardsExport {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        do {
-            return try decoder.decode(CardsExport.self, from: data)
-        } catch {
-            guard let legacy = try? decoder.decode([CardRecord].self, from: data) else { throw error }
-            return CardsExport(version: 1, cards: legacy, customRetailers: [])
-        }
+        return try decoder.decode(CardsExport.self, from: data)
     }
 }
 
@@ -67,19 +61,6 @@ struct CardsExport: Codable {
     let version: Int
     let cards: [CardRecord]
     let customRetailers: [String]
-
-    init(version: Int, cards: [CardRecord], customRetailers: [String]) {
-        self.version = version
-        self.cards = cards
-        self.customRetailers = customRetailers
-    }
-
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        version = try c.decode(Int.self, forKey: .version)
-        cards = try c.decode([CardRecord].self, forKey: .cards)
-        customRetailers = try c.decodeIfPresent([String].self, forKey: .customRetailers) ?? []
-    }
 }
 
 struct CardsDocument: FileDocument {

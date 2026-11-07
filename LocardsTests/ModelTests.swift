@@ -18,18 +18,6 @@ struct CardTypeTests {
 }
 
 struct CardRecordTests {
-    private let v1 = """
-        [{"name":"Coles","barcodeString":"123","barcodeType":"code128","dateAdded":"2026-01-01T00:00:00Z"}]
-        """
-
-    @Test func decodesLegacyArray() throws {
-        let export = try CardRecord.decode(Data(v1.utf8))
-        #expect(export.version == 1)
-        #expect(export.cards.count == 1)
-        #expect(export.cards[0].isPinned == nil)
-        #expect(export.customRetailers.isEmpty)
-    }
-
     @Test func roundTripsV2() throws {
         let card = LoyaltyCard(name: "Coles", barcodeString: "123", barcodeType: .qr)
         card.isPinned = true
@@ -64,10 +52,10 @@ struct ImportTests {
     @Test mutating func addsDedupesAndSkips() throws {
         let vm = try makeVM()
         let json = """
-            [{"name":"A","barcodeString":"1","barcodeType":"code128","dateAdded":"2026-01-01T00:00:00Z"},
-             {"name":"A","barcodeString":"1","barcodeType":"code128","dateAdded":"2026-01-01T00:00:00Z"},
-             {"name":" ","barcodeString":"2","barcodeType":"qr","dateAdded":"2026-01-01T00:00:00Z"},
-             {"name":"B","barcodeString":"é","barcodeType":"code128","dateAdded":"2026-01-01T00:00:00Z"}]
+            {"version":2,"customRetailers":[],"cards":[{"name":"A","barcodeString":"1","barcodeType":"code128","dateAdded":"2026-01-01T00:00:00Z","isPinned":false},
+             {"name":"A","barcodeString":"1","barcodeType":"code128","dateAdded":"2026-01-01T00:00:00Z","isPinned":false},
+             {"name":" ","barcodeString":"2","barcodeType":"qr","dateAdded":"2026-01-01T00:00:00Z","isPinned":false},
+             {"name":"B","barcodeString":"é","barcodeType":"code128","dateAdded":"2026-01-01T00:00:00Z","isPinned":false}]}
             """
         let first = vm.importCards(try export(json))
         #expect(first.added == 1)
