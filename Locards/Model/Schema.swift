@@ -18,6 +18,8 @@ enum StoreRecovery {
     static func makeContainer() -> (container: ModelContainer, recovered: Bool) {
         let schema = Schema(versionedSchema: SchemaV1.self)
         let config = ModelConfiguration(schema: schema)
+        try? FileManager.default.createDirectory(
+            at: config.url.deletingLastPathComponent(), withIntermediateDirectories: true)
         func open(_ config: ModelConfiguration) throws -> ModelContainer {
             try ModelContainer(for: schema, migrationPlan: LocardsMigrationPlan.self, configurations: [config])
         }
