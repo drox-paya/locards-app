@@ -41,7 +41,6 @@ struct CardRecord: Codable {
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         let envelope = CardsExport(
-            version: CardsExport.currentVersion,
             cards: cards.map(CardRecord.init(card:)),
             customRetailers: customRetailers
         )
@@ -56,9 +55,6 @@ struct CardRecord: Codable {
 }
 
 struct CardsExport: Codable {
-    static let currentVersion = 2
-
-    let version: Int
     let cards: [CardRecord]
     let customRetailers: [String]
 }

@@ -23,7 +23,6 @@ struct CardRecordTests {
         card.isPinned = true
         let data = try CardRecord.encode([card], customRetailers: ["Corner Shop"])
         let export = try CardRecord.decode(data)
-        #expect(export.version == CardsExport.currentVersion)
         #expect(export.cards.first?.isPinned == true)
         #expect(export.cards.first?.barcodeType == .qr)
         #expect(export.customRetailers == ["Corner Shop"])
@@ -52,7 +51,7 @@ struct ImportTests {
     @Test mutating func addsDedupesAndSkips() throws {
         let vm = try makeVM()
         let json = """
-            {"version":2,"customRetailers":[],"cards":[{"name":"A","barcodeString":"1","barcodeType":"code128","dateAdded":"2026-01-01T00:00:00Z","isPinned":false},
+            {"customRetailers":[],"cards":[{"name":"A","barcodeString":"1","barcodeType":"code128","dateAdded":"2026-01-01T00:00:00Z","isPinned":false},
              {"name":"A","barcodeString":"1","barcodeType":"code128","dateAdded":"2026-01-01T00:00:00Z","isPinned":false},
              {"name":" ","barcodeString":"2","barcodeType":"qr","dateAdded":"2026-01-01T00:00:00Z","isPinned":false},
              {"name":"B","barcodeString":"é","barcodeType":"code128","dateAdded":"2026-01-01T00:00:00Z","isPinned":false}]}
@@ -68,7 +67,7 @@ struct ImportTests {
     @Test mutating func keepsOnlyOnePinnedAndImportsRetailers() throws {
         let vm = try makeVM()
         let json = """
-            {"version":2,"customRetailers":["Corner Shop","Coles","Corner Shop"],"cards":[
+            {"customRetailers":["Corner Shop","Coles","Corner Shop"],"cards":[
              {"name":"A","barcodeString":"1","barcodeType":"qr","dateAdded":"2026-01-01T00:00:00Z","isPinned":true},
              {"name":"B","barcodeString":"2","barcodeType":"qr","dateAdded":"2026-01-01T00:00:00Z","isPinned":true}]}
             """
