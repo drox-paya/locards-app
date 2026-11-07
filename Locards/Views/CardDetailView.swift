@@ -2,7 +2,9 @@ import SwiftUI
 import UIKit
 
 struct CardDetailView: View {
+    let viewmodel: HomeViewModel
     let card: LoyaltyCard
+    @State private var isEditing = false
     @State private var originalBrightness: CGFloat?
 
     private var screen: UIScreen? {
@@ -29,6 +31,14 @@ struct CardDetailView: View {
             }
         }
         .padding()
+        .toolbar {
+            Button("Edit") { isEditing = true }
+        }
+        .sheet(isPresented: $isEditing) {
+            NavigationStack {
+                CardEditorView(viewmodel: viewmodel, mode: .edit(card))
+            }
+        }
         .onAppear {
             card.lastOpened = .now
             originalBrightness = screen?.brightness

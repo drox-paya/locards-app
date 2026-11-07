@@ -24,6 +24,14 @@ enum CardType: String, Codable, CaseIterable {
         case .qr, .pdf417: return true
         }
     }
+
+    func validationMessage(for value: String) -> String? {
+        guard !accepts(value) else { return nil }
+        switch self {
+        case .barcode128: return "Code 128 only supports standard ASCII characters."
+        case .qr, .pdf417: return nil
+        }
+    }
 }
 
 extension String {
